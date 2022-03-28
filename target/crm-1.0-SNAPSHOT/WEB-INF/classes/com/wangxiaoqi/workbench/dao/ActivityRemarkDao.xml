@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wangxiaoqi.workbench.dao.ActivityRemarkDao">
+    <!--查询市场活动备注条数-->
+    <select id="getActivityRemarkByIds" resultType="int">
+        select
+        count(*)
+        from
+        tbl_activity_remark
+        where activityId in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </select>
+
+    <!--删除市场活动备注-->
+    <delete id="deleteActivityRemarkByIds">
+        delete
+        from
+        tbl_activity_remark
+        where activityId in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+    <!--删除市场活动-->
+    <delete id="deleteActivityByIds">
+        delete
+        from
+        tbl_activity
+        where id in
+        <foreach collection="array" item="ids" open="(" close=")" separator=",">
+            #{ids}
+        </foreach>
+    </delete>
+
+
+</mapper>
