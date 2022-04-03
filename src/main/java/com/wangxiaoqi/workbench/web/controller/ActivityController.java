@@ -9,6 +9,7 @@ import com.wangxiaoqi.utils.ServiceFactory;
 import com.wangxiaoqi.utils.UUIDUtil;
 import com.wangxiaoqi.vo.PaginationVo;
 import com.wangxiaoqi.workbench.domain.Activity;
+import com.wangxiaoqi.workbench.domain.ActivityRemark;
 import com.wangxiaoqi.workbench.service.ActivityService;
 import com.wangxiaoqi.workbench.service.impl.ActivityServiceImpl;
 import org.apache.ibatis.binding.MapperMethod;
@@ -52,9 +53,100 @@ public class ActivityController extends HttpServlet {
         }else if ("/workbench/activity/detail.do".equals(path)) {
             System.out.println("---跳转到市场活动详细信息页---");
             detail(request,response);
+        }else if ("/workbench/activity/getRemarkList.do".equals(path)) {
+            System.out.println("---获取备注列表---");
+            getRemarkList(request,response);
+        }else if ("/workbench/activity/deleteRemark.do".equals(path)) {
+            System.out.println("---悬浮窗删除备注---");
+            deleteRemark(request,response);
+        }else if ("/workbench/activity/updateRemark.do".equals(path)) {
+            System.out.println("---更新备注---");
+            updateRemark(request,response);
+        }else if ("/workbench/activity/saveRemark.do".equals(path)) {
+            System.out.println("---添加备注---");
+            saveRemark(request,response);
         }
-        
 
+
+    }
+
+    private void updateRemark(HttpServletRequest request, HttpServletResponse response) {
+        //获取前端传过来的备注id和新备注内容
+        String id = request.getParameter("id");
+        String noteContent = request.getParameter("noteContent");
+
+        String editTime = DateTimeUtil.getSysTime();
+        String editBy = ((User) request.getSession().getAttribute("user")).getName();
+        String editFlag = "1";
+
+        //封装成一个对象
+        ActivityRemark activityRemark = new ActivityRemark();
+        activityRemark.setId(id);
+        activityRemark.setNoteContent(noteContent);
+        activityRemark.setEditTime(editTime);
+        activityRemark.setEditBy(editBy);
+        activityRemark.setEditFlag(editFlag);
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        boolean flag = as.updateRemark(activityRemark);
+
+        PrintJson.printJsonFlag(response,flag);
+
+    }
+
+    private void saveRemark(HttpServletRequest request, HttpServletResponse response) {
+        //获取前端传过来的参数
+        String noteContent = request.getParameter("noteContent");
+        String activityId = request.getParameter("activityId");
+
+        System.out.println(noteContent);
+        System.out.println(activityId);
+
+        String id = UUIDUtil.getUUID();
+        String createTime = DateTimeUtil.getSysTime();
+        String createBy = ((User)request.getSession().getAttribute("user")).getName();
+        String editFlag = "0";
+
+        //封装成一个activityRemark对象
+        ActivityRemark activityRemark = new ActivityRemark();
+        activityRemark.setId(id);
+        activityRemark.setNoteContent(noteContent);
+        activityRemark.setActivityId(activityId);
+        activityRemark.setCreateTime(createTime);
+        activityRemark.setCreateBy(createBy);
+        activityRemark.setEditFlag(editFlag);
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        boolean flag = as.saveRemark(activityRemark);
+
+        PrintJson.printJsonFlag(response,flag);
+
+    }
+
+
+    private void deleteRemark(HttpServletRequest request, HttpServletResponse response) {
+        //拿到前端传过来的参数
+        String id = request.getParameter("id");
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        boolean flag = as.deleteRemark(id);
+
+        PrintJson.printJsonFlag(response,flag);
+
+    }
+
+    private void getRemarkList(HttpServletRequest request, HttpServletResponse response) {
+        //拿到前端传过来的参数
+        String activityId = request.getParameter("activityId");
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        List<ActivityRemark> activityRemarkList = as.getRemarkList(activityId);
+
+        PrintJson.printJsonObj(response,activityRemarkList);
     }
 
     private void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

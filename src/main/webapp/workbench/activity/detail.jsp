@@ -51,8 +51,139 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 		$(".myHref").mouseout(function(){
 			$(this).children("span").css("color","#E6E6E6");
 		});
+
+		//页面加载完成后，刷新备注信息列表
+		showRemarkList();
+
+		$("#remarkBody").on("mouseover",".remarkDiv",function(){
+			$(this).children("div").children("div").show();
+		})
+		$("#remarkBody").on("mouseout",".remarkDiv",function(){
+			$(this).children("div").children("div").hide();
+		})
+
+		//给保存按钮绑定事件
+		$("#saveRemarkBtn").click(function () {
+			$.ajax({
+				url:"workbench/activity/saveRemark.do",
+				type:"post",
+				dataType:"json",
+				data:{
+					"noteContent" : $.trim($("#remark").val()),
+					"activityId" : "${a.id}"
+				},
+				success:function (data) {
+					if (data.success){
+						showRemarkList();
+						$("#remark").val("");
+					}else {
+						alert("添加失败！")
+					}
+				}
+			})
+		})
+
+		//给修改的模态窗口中更新按钮绑定事件
+		$("#updateRemarkBtn").click(function () {
+			/*获取到备注及id*/
+			var noteContent = $("#noteContent").val();
+			var id = $("#remarkId").val();
+
+			$.ajax({
+				url:"workbench/activity/updateRemark.do",
+				type:"post",
+				dataType:"json",
+				data:{
+					"id":id,
+					"noteContent":noteContent
+				},
+				success:function (data) {
+					if (data.success){
+						showRemarkList();
+						$("#editRemarkModal").modal("hide");
+					}else {
+						alert("修改失败！")
+					}
+				}
+			})
+
+		})
+
 	});
-	
+
+	//刷新备注信息列表
+	function showRemarkList() {
+		$.ajax({
+			url:"workbench/activity/getRemarkList.do",
+			type:"get",
+			dataType:"json",
+			data:{
+				"activityId":"${a.id}"
+			},
+			success:function (data) {
+				/* 需要的数据：[{备注1},{备注2},{备注3}] */
+				var html = "";
+
+				$.each(data,function (i,n) {
+
+					html += '<div id="'+n.id+'" class="remarkDiv" style="height: 60px;">';
+					html += '<img title="zhangsan" src="image/user-thumbnail.png" style="width: 30px; height:30px;">';
+					html += '<div style="position: relative; top: -40px; left: 40px;" >';
+					html += '<h5 id="e'+n.id+'">'+n.noteContent+'</h5>';
+					html += '<font color="gray">市场活动</font> <font color="gray">-</font> <b>${a.name}</b> <small style="color: gray;" id="s'+n.id+'"> '+(n.editFlag==0 ? n.createTime : n.editTime)+'由'+(n.editFlag==0 ? n.createBy : n.editBy)+'</small>';
+					html += '<div style="position: relative; left: 500px; top: -30px; height: 30px; width: 100px; display: none;">';
+					html += '<a class="myHref" href="javascript:void(0);" onclick="editRemark(\''+n.id+'\')"><span class="glyphicon glyphicon-edit" style="font-size: 20px; color: #FF0000;"></span></a>';
+					html += '&nbsp;&nbsp;&nbsp;&nbsp;';
+					html += '<a class="myHref" href="javascript:void(0) ;" onclick="deleteRemark(\''+n.id+'\')"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #FF0000;"></span></a>';
+					html += '</div>';
+					html += '</div>';
+					html += '</div>';
+
+				});
+
+				/*$("#remarkDiv").before(html);*/
+				$("#activityRemarkDiv").html(html);
+			}
+		});
+
+	}
+
+	function editRemark(id) {
+
+		//获取到当前备注id，并赋值给隐藏域中
+		$("#remarkId").val(id);
+
+		//获取到h5标题中的备注名称
+		var noteContent = $("#e"+id).html();
+
+		//将备注名称赋值到修改模态窗口文本域中
+		$("#noteContent").val(noteContent);
+
+		//打开修改模态窗口
+		$("#editRemarkModal").modal("show");
+
+	}
+
+	function deleteRemark(id) {
+		$.ajax({
+			url:"workbench/activity/deleteRemark.do",
+			type:"post",
+			dataType:"json",
+			data:{
+				"id":id
+			},
+			success:function (data) {
+				if (data.success){
+					showRemarkList();
+				}else {
+					alert("删除失败！")
+				}
+			}
+
+		})
+	}
+
+
 </script>
 
 </head>
@@ -215,13 +346,17 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 	</div>
 	
 	<!-- 备注 -->
-	<div style="position: relative; top: 30px; left: 40px;">
+	<div id="remarkBody" style="position: relative; top: 30px; left: 40px;">
 		<div class="page-header">
 			<h4>备注</h4>
 		</div>
-		
+
+		<div id="activityRemarkDiv">
+
+		</div>
+
 		<!-- 备注1 -->
-		<div class="remarkDiv" style="height: 60px;">
+		<%--<div class="remarkDiv" style="height: 60px;">
 			<img title="zhangsan" src="image/user-thumbnail.png" style="width: 30px; height:30px;">
 			<div style="position: relative; top: -40px; left: 40px;" >
 				<h5>哎呦！</h5>
@@ -232,10 +367,10 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
 				</div>
 			</div>
-		</div>
+		</div>--%>
 		
 		<!-- 备注2 -->
-		<div class="remarkDiv" style="height: 60px;">
+		<%--<div class="remarkDiv" style="height: 60px;">
 			<img title="zhangsan" src="image/user-thumbnail.png" style="width: 30px; height:30px;">
 			<div style="position: relative; top: -40px; left: 40px;" >
 				<h5>呵呵！</h5>
@@ -246,14 +381,14 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					<a class="myHref" href="javascript:void(0);"><span class="glyphicon glyphicon-remove" style="font-size: 20px; color: #E6E6E6;"></span></a>
 				</div>
 			</div>
-		</div>
+		</div>--%>
 		
 		<div id="remarkDiv" style="background-color: #E6E6E6; width: 870px; height: 90px;">
 			<form role="form" style="position: relative;top: 10px; left: 10px;">
 				<textarea id="remark" class="form-control" style="width: 850px; resize : none;" rows="2"  placeholder="添加备注..."></textarea>
 				<p id="cancelAndSaveBtn" style="position: relative;left: 737px; top: 10px; display: none;">
 					<button id="cancelBtn" type="button" class="btn btn-default">取消</button>
-					<button type="button" class="btn btn-primary">保存</button>
+					<button id="saveRemarkBtn" type="button" class="btn btn-primary">保存1</button>
 				</p>
 			</form>
 		</div>

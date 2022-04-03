@@ -7,6 +7,7 @@ import com.wangxiaoqi.vo.PaginationVo;
 import com.wangxiaoqi.workbench.dao.ActivityDao;
 import com.wangxiaoqi.workbench.dao.ActivityRemarkDao;
 import com.wangxiaoqi.workbench.domain.Activity;
+import com.wangxiaoqi.workbench.domain.ActivityRemark;
 import com.wangxiaoqi.workbench.service.ActivityService;
 
 import java.util.HashMap;
@@ -107,6 +108,56 @@ public class ActivityServiceImpl implements ActivityService {
         Activity activity = activityDao.getById(id);
 
         return activity;
+    }
+
+    @Override
+    public List<ActivityRemark> getRemarkList(String activityId) {
+
+        List<ActivityRemark> remarkList = activityRemarkDao.getRemarkList(activityId);
+
+        return remarkList;
+    }
+
+    @Override
+    public boolean deleteRemark(String id) {
+
+        boolean flag = false;
+
+        int count = activityRemarkDao.deleteRemark(id);
+
+        if (count == 1){
+            flag = true;
+        }
+
+        return flag;
+    }
+
+    @Override
+    public boolean saveRemark(ActivityRemark activityRemark) {
+
+        boolean flag = false;
+
+        int count = activityRemarkDao.saveRemark(activityRemark);
+
+        if (count == 1) {
+            flag = true;
+        }
+
+        return flag;
+    }
+
+    @Override
+    public boolean updateRemark(ActivityRemark activityRemark) {
+
+        boolean flag = true;
+
+        int count = activityRemarkDao.updateRemark(activityRemark);
+
+        if (count != 1){
+            flag = false;
+        }
+
+        return flag;
     }
 
 
