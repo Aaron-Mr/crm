@@ -18,4 +18,8 @@ public interface ActivityDao {
     int edit(Activity activity);
 
     Activity getById(String id);
+
+    List<Activity> getActivityByClue(String id);
+
+    List<Activity> getActivityListByNameAndNotByClueId(Map<String, String> map);
 }
