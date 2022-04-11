@@ -16,4 +16,8 @@ public interface ClueDao {
     List<Clue> getClueList(Map<String, Integer> map);
 
     Clue detail(String id);
+
+    Clue getClueById(String clueId);
+
+    int delete(Clue clue);
 }

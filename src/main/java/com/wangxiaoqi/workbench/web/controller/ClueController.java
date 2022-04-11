@@ -7,6 +7,7 @@ import com.wangxiaoqi.vo.PaginationVo;
 import com.wangxiaoqi.workbench.dao.ClueDao;
 import com.wangxiaoqi.workbench.domain.Activity;
 import com.wangxiaoqi.workbench.domain.Clue;
+import com.wangxiaoqi.workbench.domain.Tran;
 import com.wangxiaoqi.workbench.service.ActivityService;
 import com.wangxiaoqi.workbench.service.ClueService;
 import com.wangxiaoqi.workbench.service.impl.ActivityServiceImpl;
@@ -47,7 +48,61 @@ public class ClueController extends HttpServlet {
             getActivityListByNameAndNotByClueId(request,response);
         }else if ("/workbench/clue/bund.do".equals(path)) {
             bund(request,response);
+        }else if ("/workbench/clue/getActivityListByName.do".equals(path)) {
+            getActivityListByName(request,response);
+        }else if ("/workbench/clue/convert.do".equals(path)) {
+            convert(request,response);
         }
+
+
+    }
+
+    private void convert(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("---线索转换---");
+        String clueId = request.getParameter("clueId");
+        //如果flag是1的话，证明需要创建交易
+        String flag1 = request.getParameter("flag");
+
+        String creatBy = ((User) request.getSession().getAttribute("user")).getName();
+
+        Tran tran = null;
+
+        //如果需要创建交易的话，就给交易对象tran初始化
+        if ("1".equals(flag1)){
+            tran = new Tran();
+            //接收前端传过来的参数，封装对象
+            tran.setMoney(request.getParameter("money"));
+            tran.setName(request.getParameter("name"));
+            tran.setExpectedDate(request.getParameter("expectedDate"));
+            tran.setStage(request.getParameter("stage"));
+            tran.setActivityId(request.getParameter("activityId"));
+            tran.setId(UUIDUtil.getUUID());
+            tran.setCreateTime(DateTimeUtil.getSysTime());
+            tran.setCreateBy(creatBy);
+        }
+
+        ClueService clueService = (ClueService) ServiceFactory.getService(new ClueServiceImpl());
+
+        boolean flag2 = clueService.convert(clueId,tran,creatBy);
+        System.out.println("--------------------------------------------------------------");
+        System.out.println(flag2);
+
+        if (flag2){
+            response.sendRedirect(request.getContextPath()+"/workbench/clue/index.jsp");
+        }
+
+    }
+
+    private void getActivityListByName(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("线索转换-搜索市场活动");
+
+        String activityName = request.getParameter("activityName");
+
+        ActivityService as = (ActivityService) ServiceFactory.getService(new ActivityServiceImpl());
+
+        List<Activity> activityList = as.getActivityListByName(activityName);
+
+        PrintJson.printJsonObj(response,activityList);
 
     }
 

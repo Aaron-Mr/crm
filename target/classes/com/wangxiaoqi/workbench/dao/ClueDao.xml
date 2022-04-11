@@ -5,6 +5,13 @@
 
 <mapper namespace="com.wangxiaoqi.workbench.dao.ClueDao">
 
+    <delete id="delete">
+        delete from tbl_clue where id=#{id}
+    </delete>
+
+    <select id="getClueById" resultType="Clue">
+        select * from tbl_clue where id=#{id}
+    </select>
 
     <select id="detail" resultType="Clue">
         select
